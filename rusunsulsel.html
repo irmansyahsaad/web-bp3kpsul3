@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="apple-touch-icon" href="assets/img/logobp3kpsul3.png">
+    <link rel="shortcut icon" type="image/x-icon" href="logobp3kpsul3.png">
+
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/templatemo.css">
+    <link rel="stylesheet" href="assets/css/custom.css">
+
+    <!-- Load fonts style after rendering the layout styles -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+  <meta charset="utf-8" />
+  <title>Rusun Sulawesi Selatan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- CSS Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+
+    /* Navbar tetap di depan */
+    nav.navbar {
+      position: fixed;
+      z-index: 9999 !important;
+      width: 100%;
+      top: 0;
+      background: rgba(234, 210, 170, 0.4) !important;
+	  backdrop-filter: blur(8px);
+    }
+
+	body {
+    padding-top: 90px; /* sesuaikan dengan tinggi navbar */
+	}
+	
+	.dropdown-menu {
+	z-index: 99999 !important;
+	}
+	
+	.popup-content {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+	.popup-content img {
+      width: 310px;
+      border-radius: 8px;
+      margin-top: 5px;
+    }
+</style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light shadow">
+        <div class="container d-flex justify-content-between align-items-center">
+
+            <div class="logo">
+				<img src="./assets/img/logolengkap.png" alt="Logo" style="height:70px;">
+			</div>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#templatemo_main_nav" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="align-self-center collapse navbar-collapse flex-fill  d-lg-flex justify-content-lg-between" id="templatemo_main_nav">
+                <div class="flex-fill">
+                    <ul class="nav navbar-nav d-flex justify-content-between mx-lg-auto">
+                        <li><a href="index.html">Beranda</a></li>
+							<li class="dropdown">
+							  <a>Rumah Susun ▼</a>
+							  <ul class="dropdown-menu">
+								<li><a href="rusunsulsel.html">Peta Sebaran Rusun Sulawesi Selatan</a></li>
+								<li><a href="rusunsultra.html">Peta Sebaran Rusun Sulawesi Tenggara</a></li>
+							  </ul>
+							</li>
+							<li class="dropdown">
+							  <a>PSU ▼</a>
+							  <ul class="dropdown-menu">
+								<li><a href="psusulsel.html">Peta Sebaran PSU Sulawesi Selatan</a></li>
+								<li><a href="psusultra.html">Peta Sebaran PSU Sulawesi Tenggara</a></li>
+							  </ul>
+							</li>
+							<li><a href="#contact">Informasi</a></li>
+                    </ul>
+                </div>
+                <div class="navbar align-self-center d-flex">
+                    <div class="d-lg-none flex-sm-fill mt-3 mb-4 col-7 col-sm-auto pr-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="inputMobileSearch" placeholder="Search ...">
+                            <div class="input-group-text">
+                                <i class="fa fa-fw fa-search"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <a class="nav-icon d-none d-lg-inline" href="#" data-bs-toggle="modal" data-bs-target="#templatemo_search">
+                        <i class="fa fa-fw fa-search text-dark mr-2"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+
+<div id="map"></div>
+
+<!-- JS Leaflet -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  // Inisialisasi peta (Sulawesi Selatan & Tenggara)
+  var map = L.map('map').setView([-4.130, 120.970], 8); // -4.130/120.970
+  
+      // Google Satellite Tiles (tidak resmi)
+    var googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+      maxZoom: 20,
+      subdomains:['mt0','mt1','mt2','mt3']
+    });
+
+    // OpenStreetMap
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Web Map Dev irmansyahsaad'
+    });
+
+    // Tambahkan default layer
+    osm.addTo(map);
+
+    // Kontrol layer (bisa pilih OSM / Google Satellite)
+    var baseMaps = {
+      "OpenStreetMap": osm,
+      "Google Satellite": googleSat
+    };
+    L.control.layers(baseMaps).addTo(map);
+
+  // Data GeoJSON (contoh: titik lokasi)
+  var geojsonData = {	
+    "type": "FeatureCollection",
+    "features": [
+    // SULAWESI SELATAN
+	 {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Rumah Susun ASN Luwu Utara",
+            "alamat": "Dusun Porodoa, Kec. Mappadeceng, Kab. Luwu Utara",
+			"deskripsi": "Tahun Anggaran : 2024"
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.36132951943203, -2.5338506725399816]  // [lng, lat] //-2.5338506725399816, 120.36132951943203
+        }
+      },{
+        "type": "Feature",
+        "properties": { 
+            "nama": "Rumah Susun Pondok Pesantren Abnaul Amir",
+            "alamat": "Moncobalang, Bontosunggu, Kec. Bontonompo, Kab.Gowa",
+			"deskripsi": "Tahun Anggaran : 2024"
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.39410278667135, -5.412112916219499]  // [lng, lat] //-5.412112916219499, 119.39410278667135
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Rumah Susun Madrasah Arifah Yayasan Arifah",
+            "alamat": "Jl. Bakolu, Pangkabinanga, Kec. Pallangga, Kab. Gowa",
+            "deskripsi": "Tahun Anggaran : 2023",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.46081520649253, -5.226327774640974] //-5.226327774640974, 119.46081520649253
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Rumah Susun Pondok Pesantren Nadhliyin Agrobisnis",
+            "alama	t": "Jl. Veteran Dusun Pattiro Data, Abbumpungeng, Kec. Cina, Kab. Bone",
+            "deskripsi": "Tahun Anggaran : 2023-2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.2671268149991, -4.741259673720157] //-4.741259673720157, 120.2671268149991
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Rumah Susun Pondok Pesantren Darul Arqam Muhammadiyah Balebo Luwu Utara",
+            "alamat": "Kappuna, Kec. Masamba, Kab. Luwu Utara",
+            "deskripsi": "Tahun Anggaran : 2023-2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.32863004980277, -2.5243309257141346] //-2.5243309257141346, 120.32863004980277
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Rumah Susun Pondok Pesantren Asadiyah Belawa Baru",
+            "alamat": "Gampuae, Pattimang, Kec. Malangke, Kab. Luwu Utara",
+            "deskripsi": "Tahun Anggaran : 2023-2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.38261433498457, -2.77104818409183] //-2.77104818409183, 120.38261433498457
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Rumah Susun Al-Junaidiyah",
+            "alamat": "Jl. Jenderal Sudirman, Biru, Kec. Tanete Riattang, Kab. Bone",
+            "deskripsi": "Tahun Anggaran : 2023-2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.33221702426891, -4.556192788393366] //-4.556192788393366, 120.33221702426891
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Rumah Susun POLDA Sulawesi Selatan",
+            "alamat": "Jl. Perintis Kemerdekaan KM.16, Kec. Biringkanaya, Kota Makassar",
+            "deskripsi": "Tahun Anggaran : 2023-2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.51607357027575, -5.097779703836189] //-5.097779703836189, 119.51607357027575
+        }
+      }
+    ]
+  };
+
+  // Tambahkan GeoJSON ke peta
+  L.geoJSON(geojsonData, {
+    onEachFeature: function (feature, layer) {
+        if (feature.properties) {
+          var popupContent = `
+            <div class="popup-content">
+              <b>${feature.properties.nama}</b><br>
+              <i>${feature.properties.alamat}</i><br><br>
+              ${feature.properties.deskripsi}<br>
+            </div>
+          `;
+          layer.bindPopup(popupContent);
+        }
+      }
+  }).addTo(map);
+  
+</script>
+
+</body>
+</html>

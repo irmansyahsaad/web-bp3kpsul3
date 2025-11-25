@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rusun Sulawesi Tenggara</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="apple-touch-icon" href="assets/img/logobp3kpsul3.png">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/logobp3kpsul3.png">
+
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/templatemo.css">
+    <link rel="stylesheet" href="assets/css/custom.css">
+
+    <!-- Load fonts style after rendering the layout styles -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+
+  <!-- CSS Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+
+    /* Navbar tetap di depan */
+    nav.navbar {
+      position: fixed;
+      z-index: 9999 !important;
+      width: 100%;
+      top: 0;
+      background: rgba(234, 210, 170, 0.4) !important;
+	  backdrop-filter: blur(8px);
+    }
+
+	body {
+    padding-top: 90px; /* sesuaikan dengan tinggi navbar */
+	}
+	
+	.dropdown-menu {
+	z-index: 99999 !important;
+	}
+	
+	.popup-content {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+	.popup-content img {
+      width: 310px;
+      border-radius: 8px;
+      margin-top: 5px;
+    }
+</style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light shadow">
+        <div class="container d-flex justify-content-between align-items-center">
+
+            <div class="logo">
+				<img src="./assets/img/logolengkap.png" alt="Logo" style="height:70px;">
+			</div>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#templatemo_main_nav" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="align-self-center collapse navbar-collapse flex-fill  d-lg-flex justify-content-lg-between" id="templatemo_main_nav">
+                <div class="flex-fill">
+                    <ul class="nav navbar-nav d-flex justify-content-between mx-lg-auto">
+                        <li><a href="index.html">Beranda</a></li>
+							<li class="dropdown">
+							  <a>Rumah Susun ▼</a>
+							  <ul class="dropdown-menu">
+								<li><a href="rusunsulsel.html">Peta Sebaran Rusun Sulawesi Selatan</a></li>
+								<li><a href="rusunsultra.html">Peta Sebaran Rusun Sulawesi Tenggara</a></li>
+							  </ul>
+							</li>
+							<li class="dropdown">
+							  <a>PSU ▼</a>
+							  <ul class="dropdown-menu">
+								<li><a href="psusulsel.html">Peta Sebaran PSU Sulawesi Selatan</a></li>
+								<li><a href="psusultra.html">Peta Sebaran PSU Sulawesi Tenggara</a></li>
+							  </ul>
+							</li>
+							<li><a href="#contact">Informasi</a></li>
+                    </ul>
+                </div>
+                <div class="navbar align-self-center d-flex">
+                    <div class="d-lg-none flex-sm-fill mt-3 mb-4 col-7 col-sm-auto pr-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="inputMobileSearch" placeholder="Search ...">
+                            <div class="input-group-text">
+                                <i class="fa fa-fw fa-search"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <a class="nav-icon d-none d-lg-inline" href="#" data-bs-toggle="modal" data-bs-target="#templatemo_search">
+                        <i class="fa fa-fw fa-search text-dark mr-2"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+<div id="map"></div>
+
+<!-- JS Leaflet -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  // Inisialisasi peta (Sulawesi Selatan & Tenggara)
+  var map = L.map('map').setView([-4.130, 120.970], 8); // -4.130/120.970
+  
+      // Google Satellite Tiles (tidak resmi)
+    var googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+      maxZoom: 20,
+      subdomains:['mt0','mt1','mt2','mt3']
+    });
+
+    // OpenStreetMap
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Web Map Dev irmansyahsaad'
+    });
+
+    // Tambahkan default layer
+    osm.addTo(map);
+
+    // Kontrol layer (bisa pilih OSM / Google Satellite)
+    var baseMaps = {
+      "OpenStreetMap": osm,
+      "Google Satellite": googleSat
+    };
+    L.control.layers(baseMaps).addTo(map);
+
+  // Data GeoJSON (contoh: titik lokasi)
+  var geojsonData = {	
+    "type": "FeatureCollection",
+    "features": [
+    // Sulawesi Tenggara
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Rumah Susun Ponpes Attarbiyah",
+            "alamat": "Jl. Daeng Pasau No.7, Tahoa, Kec. Kolaka, Kab. Kolaka",
+            "deskripsi": "Tahun Anggaran : 2024",
+			"koordinat": "Koordinat : -4.073889511161227, 121.61148872028106",
+			"gambar": "assets/img/rusunponpesattarbiyahkendari.png"
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [121.61148872028106, -4.073889511161227] //-4.073889511161227, 121.61148872028106
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Rumah Susun ASN BPK PWK Sultra",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.5149055646652, -3.9797702746141304] //-3.9797702746141304, 122.5149055646652
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Rumah Susun Ponpes Tahfizul Quran Baiturrahim",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [121.52387538391484, -4.35793462086549] //-4.35793462086549, 121.52387538391484
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Rumah Susun Universitas Muhammadiyah Kendari",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.5069331893443, -3.9998409927733602] //-3.9998409927733602, 122.5069331893443
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Rumah Susun Universitas Muhammadiyah Buton",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.62927605593448, -5.473159145454095] //-5.473159145454095, 122.62927605593448
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Rumah Susun IAIN Kendari",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.47517757317573, -4.04408675673004] //-4.04408675673004, 122.47517757317573
+        }
+      }
+    ]
+  };
+
+  // Tambahkan GeoJSON ke peta
+  L.geoJSON(geojsonData, {
+    onEachFeature: function (feature, layer) {
+        if (feature.properties) {
+          var popupContent = `
+            <div class="popup-content">
+              <b>${feature.properties.nama}</b><br>
+              <i>${feature.properties.alamat}</i><br><br>
+              ${feature.properties.deskripsi}<br>
+			  ${feature.properties.koordinat}<br>
+			  ${feature.properties.gambar ? `<img src="${feature.properties.gambar}" alt="Foto lokasi">` : ""}
+            </div>
+          `;
+          layer.bindPopup(popupContent);
+        }
+      }
+  }).addTo(map);
+  
+</script>
+
+</body>
+</html>

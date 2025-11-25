@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="apple-touch-icon" href="assets/img/logobp3kpsul3.png">
+    <link rel="shortcut icon" type="image/x-icon" href="logobp3kpsul3.png">
+
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/templatemo.css">
+    <link rel="stylesheet" href="assets/css/custom.css">
+
+    <!-- Load fonts style after rendering the layout styles -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+<!-- Header -->
+    
+    <!-- Close Header -->
+  <meta charset="utf-8" />
+  <title>PSU Sulawesi Selatan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- CSS Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  
+<style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+
+    /* Navbar tetap di depan */
+    nav.navbar {
+      position: fixed;
+      z-index: 9999 !important;
+      width: 100%;
+      top: 0;
+      background: rgba(234, 210, 170, 0.4) !important;
+	  backdrop-filter: blur(8px);
+    }
+
+	body {
+    padding-top: 90px; /* sesuaikan dengan tinggi navbar */
+	}
+	
+	.dropdown-menu {
+	z-index: 99999 !important;
+	}
+	
+	.popup-content {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+	.popup-content img {
+      width: 310px;
+      border-radius: 8px;
+      margin-top: 5px;
+    }
+</style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light shadow">
+        <div class="container d-flex justify-content-between align-items-center">
+
+            <div class="logo">
+				<img src="./assets/img/logolengkap.png" alt="Logo" style="height:70px;">
+			</div>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#templatemo_main_nav" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="align-self-center collapse navbar-collapse flex-fill  d-lg-flex justify-content-lg-between" id="templatemo_main_nav">
+                <div class="flex-fill">
+                    <ul class="nav navbar-nav d-flex justify-content-between mx-lg-auto">
+                        <li><a href="index.html">Beranda</a></li>
+							<li class="dropdown">
+							  <a>Rumah Susun ▼</a>
+							  <ul class="dropdown-menu">
+								<li><a href="rusunsulsel.html">Peta Sebaran Rusun Sulawesi Selatan</a></li>
+								<li><a href="rusunsultra.html">Peta Sebaran Rusun Sulawesi Tenggara</a></li>
+							  </ul>
+							</li>
+							<li class="dropdown">
+							  <a>PSU ▼</a>
+							  <ul class="dropdown-menu">
+								<li><a href="psusulsel.html">Peta Sebaran PSU Sulawesi Selatan</a></li>
+								<li><a href="psusultra.html">Peta Sebaran PSU Sulawesi Tenggara</a></li>
+							  </ul>
+							</li>
+							<li><a href="#contact">Informasi</a></li>
+                    </ul>
+                </div>
+                <div class="navbar align-self-center d-flex">
+                    <div class="d-lg-none flex-sm-fill mt-3 mb-4 col-7 col-sm-auto pr-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="inputMobileSearch" placeholder="Search ...">
+                            <div class="input-group-text">
+                                <i class="fa fa-fw fa-search"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <a class="nav-icon d-none d-lg-inline" href="#" data-bs-toggle="modal" data-bs-target="#templatemo_search">
+                        <i class="fa fa-fw fa-search text-dark mr-2"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+
+    <!-- Start Script -->
+    <script src="assets/js/jquery-1.11.0.min.js"></script>
+    <script src="assets/js/jquery-migrate-1.2.1.min.js"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/templatemo.js"></script>
+    <script src="assets/js/custom.js"></script>
+    <!-- End Script -->
+
+<div id="map"></div>
+
+<!-- JS Leaflet -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  // Inisialisasi peta (Sulawesi Selatan & Tenggara)
+  var map = L.map('map').setView([-4.130, 120.970], 8); // -4.130/120.970
+  
+      // Google Satellite Tiles (tidak resmi)
+    var googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+      maxZoom: 20,
+      subdomains:['mt0','mt1','mt2','mt3']
+    });
+
+    // OpenStreetMap
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Web Map Dev irmansyahsaad'
+    });
+
+    // Tambahkan default layer
+    osm.addTo(map);
+
+    // Kontrol layer (bisa pilih OSM / Google Satellite)
+    var baseMaps = {
+      "OpenStreetMap": osm,
+      "Google Satellite": googleSat
+    };
+    L.control.layers(baseMaps).addTo(map);
+
+  // Data GeoJSON (contoh: titik lokasi)
+  var geojsonData = {	
+    "type": "FeatureCollection",
+    "features": [
+    // Sulawesi Tenggara
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN JINGGA LAND CARANGKI",
+            "alamat": "Jl. Poros Kariango-Carangki, Lekopancing, Kec. Tanralili, Kab.Maros",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.59949884480395, -5.104576348790075] //-5.104576348790075, 119.59949884480395
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN PERMATA LION RESIDENCE",
+            "alamat": "Jl. Poros Kariango, Kurusumange, Kec. Mandai, Kab.Maros",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.56842359564689, -5.085334765767672] //-5.085334765767672, 119.56842359564689
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN FIRANDA MAS REGENCY 2",
+            "alamat": "Jln. Inspeksi PAM, Moncongloe Bulu,Kec. Moncong Loe, Kab. Maros",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.54349465302468, -5.154517748387159] //-5.154517748387159, 119.54349465302468
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN D'BURLY",
+            "alamat": "Lekopancing,Kab. Maros",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.6010176501774, -5.097608286176332] //-5.097608286176332, 119.6010176501774
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN GRAHA CITRA BUDIMAN",
+            "alamat": "Jl. Pemuda, Pattontongan, Kec. Mandai, Kab. Maros",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.56620174675491, -5.106541489809415] //-5.106541489809415, 119.56620174675491
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN PADAELO REGENCY",
+            "alamat": "Jl. Poros Padelo Panontongan, Tenrigangkae, Kec. Mandai, Kab. Maros",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.5713095562298, -5.094601282360512] //-5.094601282360512, 119.5713095562298
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN PESONA TANRALILI PERMAI",
+            "alamat": "JL, Damai, Kec. Tanralili, Kab. Maros",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.61159844068168, -5.08942740566615] //-5.08942740566615, 119.61159844068168
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN GRAHA MAS RESIDENCE",
+            "alamat": "Bonto Marannu, Kec. Moncong Loe, Kab. Maros",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.55434087448793, -5.122654656438673] //-5.122654656438673, 119.55434087448793
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Je'nemadinging, Kec. Pattallassang, Kab. Gowa",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.5381491097813, -5.17471028457753] //-5.17471028457753, 119.5381491097813
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN D' PATTIRO HILL",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.53847244378706, -5.182987517084924] //-5.182987517084924, 119.53847244378706
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN ALFATIH RESIDENCE",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.48894437941006, -5.246570629678167] //-5.246570629678167, 119.48894437941006
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN GRIYA BUMI PALLANGGA",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.48465440153399, -5.250497063582568] //-5.250497063582568, 119.48465440153399
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN GRIYA KENCANA PAKATTO",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.55598845122712, -5.289149905011195] //-5.289149905011195, 119.55598845122712
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN GRAND VILLA SEJAHTERA",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.21745995653119, -3.043922462359716] //-3.043922462359716, 120.21745995653119
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN GRAND GREEN RESIDENCE PADANG ALIPAN",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.1728186686219, -2.9013344622048782] //-2.9013344622048782, 120.1728186686219
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN TIARA RESIDENCE",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.19815457035891, -5.535436441979515] //-5.535436441979515, 120.19815457035891
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN RINDRA PRATAMA V",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.19947780894898, -5.526687405594094] //-5.526687405594094, 120.19947780894898
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN ARU LAND CABALU",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.31277975635575, -4.5185639050199935] //-4.5185639050199935, 120.31277975635575
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN KYA RESIDENCE",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.29965846083257, -4.543636576626713] //-4.543636576626713, 120.29965846083257
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN GRIYA AYU MAJANG",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.30457258195416, -4.555181324304533] //-4.555181324304533, 120.30457258195416
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN GRIYA LALABATA RILAU I",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.89520165505628, -4.377155128722231] //-4.377155128722231, 119.89520165505628
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN ARRUMIYAH RESIDENCE",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.8868031407738, -4.347151041421003] //-4.347151041421003, 119.8868031407738
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN AL-AZHAR RESIDENCE 2",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.0155237290042, -4.20432456593606] //-4.20432456593606, 120.0155237290042
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN GRIYA IFAH 3",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.3867123025718, -5.234220572177792] //-5.234220572177792, 119.3867123025718
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN ASERA ESTATE GALESONG",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.39774948234142, -5.238054443512226] //-5.238054443512226, 119.39774948234142
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN BUMI BENTENG MAS",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.25273932485345, -5.106584374930227] //-5.106584374930227, 120.25273932485345
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN SEGERI ABADI RESIDENCE",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.58695234951104, -4.6413512946918924] //-4.6413512946918924, 119.58695234951104
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN BUKIT MADANI PERMAI",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.6634043786779, -4.001937953783637] //-4.001937953783637, 119.6634043786779
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN BUMI GALSER PERMAI",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.78293410765582, -3.9275431877378653] //-3.9275431877378653, 119.78293410765582
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN NINDA KENZU 4",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [121.39485283244427, -2.647412240301055] //-2.647412240301055, 121.39485283244427
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN BUMI PAJUKUKANG MAS",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.0269772086576, -5.570229162897273] //-5.570229162897273, 120.0269772086576
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN BUMI FINDARIA MAS 3",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.52564363958531, -5.154956305516998] //-5.154956305516998, 119.52564363958531
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN BUKIT KETAPANG",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.56243554703376, -5.216949739865659] //-5.216949739865659, 119.56243554703376
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN BINA SARANA RESIDENCE 3",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.53893296353128, -5.168697786299066] //-5.168697786299066, 119.53893296353128
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN BE ONE RESIDENCE",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.33180926338561, -4.569699999746375] //-4.569699999746375, 120.33180926338561
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN SAWITTO INDAH 4",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [119.66379972631604, -4.000264723476556] //-4.000264723476556, 119.66379972631604
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "PERUMAHAN VILLA EMAS REGENCY",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [120.01870457577175, -5.5594634023820095] //-5.5594634023820095, 120.01870457577175
+        }
+      },
+    ]
+  };
+
+  // Tambahkan GeoJSON ke peta
+  L.geoJSON(geojsonData, {
+    pointToLayer: function (feature, latlng) {
+        return L.circleMarker(latlng, {
+            color: 'red',       // Warna garis lingkaran
+            fillColor: 'red',   // Warna pengisian lingkaran
+            fillOpacity: 0.5,    // Opasitas pengisian lingkaran
+            radius: 6,           // Ukuran radius lingkaran
+        }).bindPopup( // Menambahkan popup ke marker
+            "<b>" + feature.properties.nama + "</b><br>" + 
+            "Alamat: " + feature.properties.alamat + "<br>" + 
+            feature.properties.deskripsi
+        );
+    }
+    }).addTo(map);
+ 
+</script>
+
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PSU Sulawesi Tenggara</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="apple-touch-icon" href="assets/img/logobp3kpsul3.png">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/logobp3kpsul3.png">
+
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/templatemo.css">
+    <link rel="stylesheet" href="assets/css/custom.css">
+
+    <!-- Load fonts style after rendering the layout styles -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+
+  <!-- CSS Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+
+    /* Navbar tetap di depan */
+    nav.navbar {
+      position: fixed;
+      z-index: 9999 !important;
+      width: 100%;
+      top: 0;
+      background: rgba(234, 210, 170, 0.4) !important;
+	  backdrop-filter: blur(8px);
+    }
+
+	body {
+    padding-top: 90px; /* sesuaikan dengan tinggi navbar */
+	}
+	
+	.dropdown-menu {
+	z-index: 99999 !important;
+	}
+	
+	.popup-content {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+	.popup-content img {
+      width: 310px;
+      border-radius: 8px;
+      margin-top: 5px;
+    }
+</style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light shadow">
+        <div class="container d-flex justify-content-between align-items-center">
+
+            <div class="logo">
+				<img src="./assets/img/logolengkap.png" alt="Logo" style="height:70px;">
+			</div>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#templatemo_main_nav" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="align-self-center collapse navbar-collapse flex-fill  d-lg-flex justify-content-lg-between" id="templatemo_main_nav">
+                <div class="flex-fill">
+                    <ul class="nav navbar-nav d-flex justify-content-between mx-lg-auto">
+                        <li><a href="index.html">Beranda</a></li>
+							<li class="dropdown">
+							  <a>Rumah Susun ▼</a>
+							  <ul class="dropdown-menu">
+								<li><a href="rusunsulsel.html">Peta Sebaran Rusun Sulawesi Selatan</a></li>
+								<li><a href="rusunsultra.html">Peta Sebaran Rusun Sulawesi Tenggara</a></li>
+							  </ul>
+							</li>
+							<li class="dropdown">
+							  <a>PSU ▼</a>
+							  <ul class="dropdown-menu">
+								<li><a href="psusulsel.html">Peta Sebaran PSU Sulawesi Selatan</a></li>
+								<li><a href="psusultra.html">Peta Sebaran PSU Sulawesi Tenggara</a></li>
+							  </ul>
+							</li>
+							<li><a href="#contact">Informasi</a></li>
+                    </ul>
+                </div>
+                <div class="navbar align-self-center d-flex">
+                    <div class="d-lg-none flex-sm-fill mt-3 mb-4 col-7 col-sm-auto pr-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="inputMobileSearch" placeholder="Search ...">
+                            <div class="input-group-text">
+                                <i class="fa fa-fw fa-search"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <a class="nav-icon d-none d-lg-inline" href="#" data-bs-toggle="modal" data-bs-target="#templatemo_search">
+                        <i class="fa fa-fw fa-search text-dark mr-2"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+
+<div id="map"></div>
+
+<!-- JS Leaflet -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  // Inisialisasi peta (Sulawesi Selatan & Tenggara)
+  var map = L.map('map').setView([-4.130, 120.970], 8); // -4.130/120.970
+  
+      // Google Satellite Tiles (tidak resmi)
+    var googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+      maxZoom: 20,
+      subdomains:['mt0','mt1','mt2','mt3']
+    });
+
+    // OpenStreetMap
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Web Map Dev irmansyahsaad'
+    });
+
+    // Tambahkan default layer
+    osm.addTo(map);
+
+    // Kontrol layer (bisa pilih OSM / Google Satellite)
+    var baseMaps = {
+      "OpenStreetMap": osm,
+      "Google Satellite": googleSat
+    };
+    L.control.layers(baseMaps).addTo(map);
+
+  // Data GeoJSON (contoh: titik lokasi)
+  var geojsonData = {	
+    "type": "FeatureCollection",
+    "features": [
+    // Sulawesi Tenggara
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Perumahan Margahayu Regency Kambu",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.54084229194483, -4.035138661773778] //-4.035138661773778, 122.54084229194483
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Perumahan Bukit Madani Permai",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.55119357971135, -4.027543662221344] //-4.02754366222134, 122.55119357971135
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Perumahan Nur Empat",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.55800530792396, -4.037745780039106] //-4.037745780039106, 122.55800530792396
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Perumahan Afika Residence",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.48026598816556, -3.979345535236782] //-3.979345535236782, 122.48026598816556
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Perumahan Afika Land",
+            "alamat": "Jl. Chairil Anwar, Kelurahan Watondo, Kec. Puuwatu, Kota Kendari",
+            "deskripsi": "Tahun Anggaran : 2024",
+			"koordinat": "Koordinat : -3.979495230725141, 122.48253287217504",
+			"gambar": "assets/img/psuafikaland.png"
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.48253287217504, -3.979495230725141] //-3.979495230725141, 122.48253287217504
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Perumahan GSK Residence",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.46525652854474, -3.9753065385114] //-3.9753065385114, 122.46525652854474
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Perumahan Grand Mangkubumi Residence",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.47287762226615, -3.9578399253463683] //-3.9578399253463683, 122.47287762226615
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Perumahan Griya IB Hasanah",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.47011509288478, -3.977014144592831] //-3.977014144592831, 122.47011509288478
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Perumahan Pesona King Adham Residence",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.47789484843184, -3.9765328201989187] //-3.9765328201989187, 122.47789484843184
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Perumahan Bumi Anawai Land",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.48342546588879, -4.010509948031198] //-4.010509948031198, 122.48342546588879
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Perumahan Citra Latambaga Indah",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [121.55571457886514, -4.036642596920607] //-4.036642596920607, 121.55571457886514
+        }
+      },
+	  {
+        "type": "Feature",
+        "properties": { 
+            "nama": "Perumahan Al Razeqi Residence",
+            "alamat": "Jln. Penjernihan",
+            "deskripsi": "Tahun Anggaran : 2024",
+          },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [122.56458536789864, -5.515794278017014] //-5.515794278017014, 122.56458536789864
+        }
+      }
+    ]
+  };
+
+  // Tambahkan GeoJSON ke peta
+L.geoJSON(geojsonData, {
+    pointToLayer: function (feature, latlng) {
+        var marker = L.circleMarker(latlng, {
+            color: 'red',
+            fillColor: 'red',
+            fillOpacity: 0.3,
+            radius: 5,
+        });
+
+        // Popup dengan gambar
+        var popupContent = `
+            <b>${feature.properties.nama}</b><br>
+            Alamat: ${feature.properties.alamat}<br>
+            ${feature.properties.deskripsi}<br><br>
+			${feature.properties.koordinat}<br><br>
+            ${feature.properties.gambar ? `<img src="${feature.properties.gambar}" width="250px" style="border-radius:8px; margin-top: 5px;">` : ""}
+        `;
+
+        marker.bindPopup(popupContent);
+        return marker;
+    }
+}).addTo(map);
+  
+</script>
+
+</body>
+</html>
